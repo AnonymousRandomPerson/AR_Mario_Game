@@ -6,8 +6,6 @@
 public class Visibility : MonoBehaviour {
 
 	/// <summary> The mesh to toggle visibility with. </summary>
-	[SerializeField]
-	[Tooltip("The mesh to toggle visibility with.")]
 	private GameObject mesh;
 	/// <summary> Whether or not the environment mesh is visible. </summary>
 	private bool meshVisible;
@@ -44,6 +42,9 @@ public class Visibility : MonoBehaviour {
 			if (platform.name == "Collider") {
 				platform.GetComponent<Renderer>().enabled = ((int)currentSetting & 2) > 0;
 			}
+		}
+		if (mesh == null) {
+			mesh = GetComponent<MeshChooser>().GetActiveMesh();
 		}
 		if (mesh != null) {
 			mesh.SetActive(meshVisible);

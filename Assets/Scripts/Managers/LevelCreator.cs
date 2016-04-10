@@ -90,6 +90,10 @@ public class LevelCreator : MonoBehaviour {
 		JSONObject input = new JSONObject(jsonText);
 		Tracker.Instance.logJSON (jsonText);
 
+		JSONObject meshJSON = input.GetField("mesh");
+		int meshIndex = meshJSON != null ? (int)meshJSON.n : 0;
+		GetComponent<MeshChooser>().ActivateMesh(meshIndex);
+
 		// Parse the path from JSON.
 		JSONObject pathJSON = input.GetField("route");
 		if (pathJSON == null) {
