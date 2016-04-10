@@ -27,4 +27,5 @@ sysinfo.txt
 *.mtl.meta
 Tracking/*
 Assets/Meshes/Materials/lambert*
+Assets/Meshes/Materials/*Mesh*
 *.DS_Store
