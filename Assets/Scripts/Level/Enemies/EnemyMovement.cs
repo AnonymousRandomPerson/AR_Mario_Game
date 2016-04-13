@@ -18,7 +18,7 @@ public abstract class EnemyMovement : MonoBehaviour, Movement {
 	/// <summary>
 	/// Moves the enemy if it is alive.
 	/// </summary>
-	private void Update() {
+	private void FixedUpdate() {
 		if (!GameMenuUI.paused && !enemy.dead) {
 			Move();
 		}
