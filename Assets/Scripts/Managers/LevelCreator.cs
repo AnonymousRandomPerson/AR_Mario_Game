@@ -400,6 +400,7 @@ public class LevelCreator : MonoBehaviour {
 	private GameObject CreatePlatform(PlatformInput top, PlatformInput bottom, bool hidden = false) {
 		GameObject virtualPlatform = new GameObject();
 		virtualPlatform.name = hidden ? "Collider" : "Virtual Platform";
+		virtualPlatform.layer = 9;
 		virtualPlatform.AddComponent<MeshFilter>();
 		virtualPlatform.AddComponent<MeshRenderer>();
 		virtualPlatform.GetComponent<Renderer>().material = virtualPlatformMaterial;

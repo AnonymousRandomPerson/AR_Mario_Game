@@ -275,7 +275,7 @@ public class Player : MonoBehaviour {
 	/// </summary>
 	/// <returns>Whether the collided object's tag is ground or not.</returns>
 	/// <param name="tag">The tag of the collided object.</param>
-	private bool isGround (string tag) {
+	private bool isGround(string tag) {
 		return tag != "Enemy" && tag != "Item" && tag != "Weapon";
 	}
 
@@ -287,7 +287,7 @@ public class Player : MonoBehaviour {
 		// Varies the player's jump height based on movement speed and held jump button.
 		if (isJumping && jumpHeightTimer < baseMaxJumpTimer * Mathf.Min(1.5f, pathMovement.moveSpeed / baseMoveSpeed)) {
 			bool incremented = false;
-			if (groundCounter > 0) {
+			if (groundCounter > 0 || Physics.Raycast(transform.position + Vector3.down * physicsCollider.bounds.extents.y, Vector3.down, 0.01f, 1 << 9)) {
 				jumpHeightTimer++;
 				incremented = true;
 				tracker.logAction("Jumped.");
@@ -411,7 +411,7 @@ public class Player : MonoBehaviour {
 	/// Adds a power-up to the player.
 	/// </summary>
 	/// <param name="newPower">The power-up to add to the player.</param>
-	public void AddPower (Power newPower) {
+	public void AddPower(Power newPower) {
 		tracker.logAction(newPower.ToString() + " power added.");
 		powers.Add(newPower);
 	}
@@ -478,7 +478,7 @@ public class Player : MonoBehaviour {
 	/// <summary>
 	/// Resets the player's animation to an idle state.
 	/// </summary>
-	private void ResetAnimation () {
+	private void ResetAnimation() {
 		animator.SetBool("moving", false);
 		animator.SetBool("running", false);
 		animator.SetBool("jumping", false);

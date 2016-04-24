@@ -61,7 +61,7 @@ public class Book : EnemyMovement {
 			}
 		} else if (stage == Stage.Fall) {
 			body.useGravity = true;
-			if (Mathf.Abs(body.velocity.y) < Mathf.Epsilon && fallDelay++ > 20) {
+			if (Mathf.Abs(body.velocity.y) < 0.01f && fallDelay++ > 20) {
 				fallDelay = 0;
 				body.useGravity = false;
 				stage = Stage.Idle;
@@ -103,8 +103,9 @@ public class Book : EnemyMovement {
 	/// <summary>
 	/// Resets the book.
 	/// </summary>
-	public override void Reset () {
+	public override void Reset() {
 		transform.position = startPosition;
+		transform.rotation = Quaternion.identity;
 		stage = Stage.Idle;
 		targetingPlayer = false;
 		fallDelay = 0;
