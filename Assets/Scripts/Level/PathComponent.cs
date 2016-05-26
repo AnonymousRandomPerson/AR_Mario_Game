@@ -204,11 +204,17 @@ public class PathComponent : MonoBehaviour {
 
 			// Find the height to draw the segment at.
 			RaycastHit hit;
-			Vector3 lineCenter = (lineStart + lineEnd) / 2;
-			lineCenter.y = PathUtil.ceilingHeight;
-			if (Physics.Raycast(lineCenter, Vector3.down, out hit, PathUtil.ceilingHeight * 1.1f, ~(1 << 11))) {
+			float heightDifference = Mathf.Abs(lineStart.y - lineEnd.y) + 1;
+			float centerHeight = (lineStart.y + lineEnd.y) / 2;
+			if (Physics.Raycast(lineStart + Vector3.up * heightDifference, Vector3.down, out hit, PathUtil.ceilingHeight * 1.1f * 100, ~(1 << 11))) {
 				lineStart.y = hit.point.y;
+			} else {
+				lineStart.y = centerHeight;
+			}
+			if (Physics.Raycast(lineEnd + Vector3.up * heightDifference, Vector3.down, out hit, PathUtil.ceilingHeight * 1.1f * 100, ~(1 << 11))) {
 				lineEnd.y = hit.point.y;
+			} else {
+				lineEnd.y = centerHeight;
 			}
 
 			// Draw the segment.

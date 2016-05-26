@@ -3,7 +3,7 @@
 /// <summary>
 /// Moves like BackAndForthPath, but takes a long time to make turns.
 /// </summary>
-public class Pencil : MonoBehaviour, Movement {
+public class Pencil : EnemyMovement {
 	
 	/// <summary> Controls the entity's movement along the ribbon path. </summary>
 	private PathMovement pathMovement;
@@ -29,7 +29,8 @@ public class Pencil : MonoBehaviour, Movement {
 	/// <summary>
 	/// Initializes the pencil.
 	/// </summary>
-	private void Start() {
+	new private void Start() {
+		base.Start();
 		startDirection = RandomUtil.RandomBoolean();
 		forward = startDirection;
 		pathMovement = GetComponent<PathMovement>();
@@ -38,10 +39,7 @@ public class Pencil : MonoBehaviour, Movement {
 	/// <summary>
 	/// Moves the pencil.
 	/// </summary>
-	private void Update() {
-		if (GameMenuUI.paused) {
-			return;
-		}
+	protected override void Move() {
 		if (turningMode == 0) {
 			if (!pathMovement.MoveAlongPath(forward)) {
 				forward = !forward;
@@ -75,7 +73,7 @@ public class Pencil : MonoBehaviour, Movement {
 	/// <summary>
 	/// Resets the entity's direction and position.
 	/// </summary>
-	public void Reset() {
+	public override void Reset() {
 		forward = startDirection;
 		pathMovement.ResetPosition();
 		gameObject.transform.eulerAngles = PathUtil.SetY(gameObject.transform.eulerAngles, startRotation);

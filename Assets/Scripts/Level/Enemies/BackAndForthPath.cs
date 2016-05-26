@@ -3,7 +3,7 @@
 /// <summary>
 /// Moves along the path until hitting a barrier, then turns around.
 /// </summary>
-public class BackAndForthPath : MonoBehaviour, Movement {
+public class BackAndForthPath : EnemyMovement {
 
 	/// <summary> Controls the entity's movement along the ribbon path. </summary>
 	private PathMovement pathMovement;
@@ -15,7 +15,8 @@ public class BackAndForthPath : MonoBehaviour, Movement {
 	/// <summary>
 	/// Initializes the movement.
 	/// </summary>
-	private void Start() {
+	new private void Start() {
+		base.Start();
 		startDirection = RandomUtil.RandomBoolean();
 		forward = startDirection;
 		pathMovement = GetComponent<PathMovement>();
@@ -24,10 +25,7 @@ public class BackAndForthPath : MonoBehaviour, Movement {
 	/// <summary>
 	/// Moves the object along the path.
 	/// </summary>
-	private void Update() {
-		if (GameMenuUI.paused) {
-			return;
-		}
+	protected override void Move() {
 		if (!pathMovement.MoveAlongPath(forward)) {
 			forward = !forward;
 		}
@@ -36,7 +34,7 @@ public class BackAndForthPath : MonoBehaviour, Movement {
 	/// <summary>
 	/// Resets the entity's direction and position.
 	/// </summary>
-	public void Reset() {
+	public override void Reset() {
 		forward = startDirection;
 		pathMovement.ResetPosition();
 	}

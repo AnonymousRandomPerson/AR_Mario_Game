@@ -13,7 +13,7 @@ public class Rotate : MonoBehaviour {
 	/// <summary>
 	/// Rotates the object.
 	/// </summary>
-	private void Update () {
+	private void FixedUpdate () {
 		if (GameMenuUI.paused) {
 			return;
 		}

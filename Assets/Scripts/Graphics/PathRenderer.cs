@@ -6,7 +6,7 @@
 public class PathRenderer {
 	
 	/// <summary> The thickness of the rendered line. </summary>
-	private const float LINETHICKNESS = 0.05f;
+	private const float LINETHICKNESS = 0.002f;
 
 	/// <summary> The path component that this line is displaying. </summary>
 	private PathComponent pathComponent;

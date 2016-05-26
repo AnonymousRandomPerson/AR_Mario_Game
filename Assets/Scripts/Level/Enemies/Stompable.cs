@@ -6,6 +6,11 @@
 /// </summary>
 public class Stompable : MonoBehaviour {
 
+	/// <summary> The height threshold for killing the enemy. </summary>
+	[SerializeField]
+	[Tooltip("The height threshold for killing the enemy.")]
+	private Transform head;
+
 	/// <summary>
 	/// Fires when the enemy hits something.
 	/// </summary>
@@ -13,14 +18,13 @@ public class Stompable : MonoBehaviour {
 	private void OnCollisionEnter(Collision collision) {
 		if (collision.collider.tag == "Player") {
 			// Check if the player is high enough to flatten the enemy.
-			float playerStompHeight = collision.collider.transform.position.y - collision.collider.bounds.extents.y;
-			float enemyHeadHeight = transform.position.y + GetComponent<Collider>().bounds.extents.y * 0.49f;
-			if (playerStompHeight > enemyHeadHeight || collision.collider.transform.GetComponent<Rigidbody>().velocity.y < -0.01f) {
-				collision.gameObject.GetComponent<Player>().StompEnemy();
+			Player player = collision.gameObject.GetComponent<Player>();
+			if (player.stomp.position.y >= head.position.y) {
+				player.StompEnemy();
 				GetComponent<Enemy>().KillEntity();
 			} else {
 				// If not, the player gets damaged.
-				collision.gameObject.GetComponent<Player>().TakeDamage();
+				player.TakeDamage();
 			}
 		}
 	}

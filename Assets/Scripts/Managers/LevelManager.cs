@@ -44,9 +44,11 @@ public class LevelManager : MonoBehaviour {
 	public bool itemIterating = false;
 
 	/// <summary> Whether to show an outline of the ribbon path. </summary>
-	[SerializeField]
 	[Tooltip("Whether to show an outline of the ribbon path.")]
-	private bool outlinePath;
+	public bool outlinePath;
+
+	/// <summary> The goal that the player needs to get to. </summary>
+	public Goal goal;
 
 	/// <summary>
 	/// Sets the level manager instance.
@@ -79,20 +81,17 @@ public class LevelManager : MonoBehaviour {
 				i--;
 			}
 		}
+		goal.Reset();
 	}
 
 	/// <summary>
 	/// Initializes the path renderer list if enabled.
 	/// </summary>
 	public void InitializePathRenderer() {
-		if (outlinePath) {
-			if (pathRendererList == null) {
-				pathRendererList = new PathRendererList(fullPath[0]);
-			} else {
-				pathRendererList.Init(fullPath[0]);
-			}
-		} else if (pathRendererList == null) {
-			pathRendererList = new PathRendererList(null);
+		if (pathRendererList == null) {
+			pathRendererList = new PathRendererList(fullPath[0]);
+		} else {
+			pathRendererList.Init(fullPath[0]);
 		}
 	}
 }

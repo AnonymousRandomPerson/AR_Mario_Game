@@ -53,6 +53,9 @@ public class PathMovement : MonoBehaviour {
 	/// <summary> Whether the object rotates at a constant speed. </summary>
 	private bool rotates = false;
 
+	/// <summary> The maximum slope angle that the object can walk on. </summary>
+	private float MAXSLOPEANGLE = 60;
+
 	/// <summary>
 	/// Initializes the path movement.
 	/// </summary>
@@ -66,6 +69,7 @@ public class PathMovement : MonoBehaviour {
 		sideOffset = GetComponent<Collider>().bounds.extents.z;
 		transform.eulerAngles = Vector3.up * Vector3.Angle(Vector3.right, currentPath.GetDirection(true));
 		rotates = GetComponent<Rotate>() != null;
+		FacePath(true);
 	}
 
 	/// <summary>
@@ -82,6 +86,15 @@ public class PathMovement : MonoBehaviour {
 	/// </summary>
 	public void UpdateGroundOffset() {
 		groundOffset = GetComponent<Collider>().bounds.extents.y;
+	}
+
+	/// <summary>
+	/// Gets the side offset of the object in the direction of its current path.
+	/// </summary>
+	/// <returns>The side offset of the object in the direction of its current path.</returns>
+	/// <param name="forward">Whether the object is moving forward.</param>
+	private Vector3 GetRotatedSideOffset(bool forward) {
+		return sideOffset * currentPath.GetDirection(forward);
 	}
 
 	/// <summary>
@@ -109,7 +122,7 @@ public class PathMovement : MonoBehaviour {
 			initiated = true;
 		}
 		transform.position = startPosition;
-		transform.eulerAngles = Vector3.up * Vector3.Angle(Vector3.right, currentPath.GetDirection(true));
+		FacePath(true);
 	}
 
 	/// <summary>
@@ -129,25 +142,25 @@ public class PathMovement : MonoBehaviour {
 		float moveDistance = moveSpeed;
 
 		// Check for side collision.
-		Vector3 sidePosition = transform.position + Vector3.down * (groundOffset - COLLISIONOFFSET);
+		Vector3 sidePosition = transform.position + Vector3.down * (groundOffset - COLLISIONOFFSET) + GetRotatedSideOffset(forward);
 		float sideIncrement = groundOffset * 2 / NUMSIDECHECKS + 2 * COLLISIONOFFSET;
 		RaycastHit hit;
 		int loopStart = 1;
 		// Test for sloped ground.
-		if (Physics.Raycast(sidePosition, currentPath.GetDirection (forward), out hit, sideOffset + moveSpeed + COLLISIONOFFSET, collisionLayers)) {
+		if (Physics.Raycast(sidePosition, currentPath.GetDirection(forward), out hit, moveSpeed + COLLISIONOFFSET, collisionLayers)) {
 			float groundDistance = hit.distance;
 			sidePosition.y += sideIncrement;
 			loopStart++;
-			if (Physics.Raycast(sidePosition, currentPath.GetDirection (forward), out hit, sideOffset + moveSpeed + COLLISIONOFFSET, collisionLayers)) {
-				if (hit.distance <= groundDistance || Mathf.Atan(sideIncrement / (hit.distance - groundDistance)) > 30 * Mathf.Deg2Rad) {
+			if (Physics.Raycast(sidePosition, currentPath.GetDirection(forward), out hit, moveSpeed + COLLISIONOFFSET, collisionLayers)) {
+				if (hit.distance <= groundDistance || Mathf.Atan(sideIncrement / (hit.distance - groundDistance)) > MAXSLOPEANGLE * Mathf.Deg2Rad) {
 					return false;
 				}
 			}
 		}
 		// Test the rest of the vertical distance for blockage.
 		for (int i = loopStart; i < NUMSIDECHECKS; i++) {
-			if (Physics.Raycast(sidePosition, currentPath.GetDirection (forward), out hit, sideOffset + moveSpeed + COLLISIONOFFSET, collisionLayers)) {
-				moveDistance = Mathf.Min(moveDistance, hit.distance - sideOffset - COLLISIONOFFSET);
+			if (Physics.Raycast(sidePosition, currentPath.GetDirection(forward), out hit, moveSpeed + COLLISIONOFFSET, collisionLayers)) {
+				moveDistance = Mathf.Min(moveDistance, hit.distance - COLLISIONOFFSET);
 				if (moveDistance < Mathf.Epsilon) {
 					return false;
 				}
@@ -182,13 +195,25 @@ public class PathMovement : MonoBehaviour {
 
 		// Move the object.
 		PathUtil.SetXZ(transform, currentPath.GetPositionInPath(pathProgress));
+		Vector3 sideCenter = transform.position + GetRotatedSideOffset(forward);
+		if (Physics.Raycast(sideCenter, Vector3.down, out hit, groundOffset, collisionLayers)) {
+			PathUtil.SetY(transform, hit.point.y + groundOffset);
+		}
 		// Rotate the object to face forward.
 		if (!rotates) {
-			Vector3 direction = currentPath.GetDirection(forward);
-			float angle = Mathf.Atan2 (direction.x, direction.z) * 180 / Mathf.PI;
-			Vector3 facing = Vector3.up * angle;
-			transform.eulerAngles = facing;
+			FacePath(forward);
 		}
 		return true;
+	}
+
+	/// <summary>
+	/// Rotates the entity to face the direction of the path.
+	/// </summary>
+	/// <param name="forward">Whether to face forward.</param>
+	public void FacePath(bool forward) {
+		Vector3 direction = currentPath.GetDirection(forward);
+		float angle = Mathf.Atan2 (direction.x, direction.z) * 180 / Mathf.PI;
+		Vector3 facing = Vector3.up * angle;
+		transform.eulerAngles = facing;
 	}
 }

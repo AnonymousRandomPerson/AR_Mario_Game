@@ -23,4 +23,10 @@ sysinfo.txt
 # User-defined
 *.obj
 *.obj.meta
+*.mtl
+*.mtl.meta
+*.mat.meta
 Tracking/*
+Assets/Meshes/Materials/lambert*
+Assets/Meshes/Materials/*Mesh*
+*.DS_Store

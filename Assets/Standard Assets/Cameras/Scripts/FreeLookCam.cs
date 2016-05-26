@@ -77,16 +77,16 @@ namespace UnityStandardAssets.Cameras
 
 			float x = Input.GetAxis("Mouse X") * 3;
 			float y = Input.GetAxis("Mouse Y") * 3;
-			if (Input.GetKey ("l")) {
+			if (Input.GetKey (KeyCode.L)) {
 				x -= 1;
 			}
-			if (Input.GetKey ("j")) {
+			if (Input.GetKey (KeyCode.J)) {
 				x += 1;
 			}
-			if (Input.GetKey ("i")) {
+			if (Input.GetKey (KeyCode.I)) {
 				y -= 1;
 			}
-			if (Input.GetKey ("k")) {
+			if (Input.GetKey (KeyCode.K)) {
 				y += 1;
 			}
 

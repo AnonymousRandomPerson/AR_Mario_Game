@@ -14,7 +14,7 @@ public class LevelCreator : MonoBehaviour {
 	/// <summary> Goal resource to be instantiated from. </summary>
 	[SerializeField]
 	[Tooltip("Goal resource to be instantiated from.")]
-	private GameObject goalPrefab;
+	private Goal goalPrefab;
 	/// <summary> Texture for virtual platforms. </summary>
 	[SerializeField]
 	[Tooltip("Texture for virtual platforms.")]
@@ -89,6 +89,10 @@ public class LevelCreator : MonoBehaviour {
 	private void CreateLevel(string jsonText) {
 		JSONObject input = new JSONObject(jsonText);
 		Tracker.Instance.logJSON (jsonText);
+
+		JSONObject meshJSON = input.GetField("mesh");
+		int meshIndex = meshJSON != null ? (int)meshJSON.n : 0;
+		GetComponent<MeshChooser>().ActivateMesh(meshIndex);
 
 		// Parse the path from JSON.
 		JSONObject pathJSON = input.GetField("route");
@@ -185,20 +189,6 @@ public class LevelCreator : MonoBehaviour {
 		
 		// Construct the path from the input points.
 		List<PathComponent> fullPath = new List<PathComponent>(pathInput.Count - 1);
-		for (int i = 0; i < fullPath.Capacity; i++) {
-			// Make and position the path component.
-			PathComponent pathComponent = CreatePath(pathInput[i], pathInput[i + 1]);
-			fullPath.Add(pathComponent);
-			pathComponent.lineMaterial = lineMaterial;
-
-			// Link paths together.
-			if (i > 0) {
-				pathComponent.previousPath = fullPath[i - 1];
-				fullPath[i - 1].nextPath = pathComponent;
-			}
-
-			pathComponent.Init();
-		}
 
 		// Construct virtual platforms to represent the colliders.
 		if (generatePathColliders) {
@@ -230,26 +220,42 @@ public class LevelCreator : MonoBehaviour {
 			}
 		}
 
+		for (int i = 0; i < fullPath.Capacity; i++) {
+			// Make and position the path component.
+			PathComponent pathComponent = CreatePath(pathInput[i], pathInput[i + 1]);
+			fullPath.Add(pathComponent);
+			pathComponent.lineMaterial = lineMaterial;
+
+			// Link paths together.
+			if (i > 0) {
+				pathComponent.previousPath = fullPath[i - 1];
+				fullPath[i - 1].nextPath = pathComponent;
+			}
+
+			pathComponent.Init();
+		}
+
 		if (fullPath.Count == 0) {
 			print ("Invalid path.");
 			return;
 		}
 
+		GetComponent<Visibility>().ApplySetting();
+
 		// Set the player on a path.
 		Player player = Instantiate(playerPrefab) as Player;
-		player.GetComponent<PathMovement>().currentPath = fullPath[0];
-		player.GetComponent<PathMovement>().startPath = fullPath[0];
+		PathMovement playerMovement = player.GetComponent<PathMovement>();
+		playerMovement.currentPath = fullPath[0];
+		playerMovement.startPath = fullPath[0];
 		foreach (PathComponent pathComponent in fullPath) {
 			pathComponent.transform.parent = player.transform;
 		}
-		FirstPersonCamera fpCamera = FindObjectOfType<FirstPersonCamera>();
-		if (fpCamera != null) {
-			fpCamera.SetPlayer(player);
-		}
+
+		levelManager.GetComponent<CameraSetting>().InitializeCameras(player);
 		levelManager.player = player;
 		
 		// Create the goal at the end of the path.
-		GameObject goal = Instantiate(goalPrefab);
+		Goal goal = Instantiate(goalPrefab);
 		goal.transform.parent = levelManager.transform.FindChild("Platforms").transform;
 		Vector3 pathEnd = PathUtil.SetY(fullPath[fullPath.Count - 1].End, PathUtil.ceilingHeight);
 		RaycastHit hit;
@@ -258,6 +264,7 @@ public class LevelCreator : MonoBehaviour {
 		} else {
 			goal.transform.position = fullPath[fullPath.Count - 1].End;
 		}
+		levelManager.goal = goal;
 
 		// Create enemies from the input.
 		List<Enemy> enemies = new List<Enemy>(enemyInput.Count);
@@ -393,6 +400,7 @@ public class LevelCreator : MonoBehaviour {
 	private GameObject CreatePlatform(PlatformInput top, PlatformInput bottom, bool hidden = false) {
 		GameObject virtualPlatform = new GameObject();
 		virtualPlatform.name = hidden ? "Collider" : "Virtual Platform";
+		virtualPlatform.layer = 9;
 		virtualPlatform.AddComponent<MeshFilter>();
 		virtualPlatform.AddComponent<MeshRenderer>();
 		virtualPlatform.GetComponent<Renderer>().material = virtualPlatformMaterial;

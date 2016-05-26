@@ -11,15 +11,17 @@ public class PathRendererList {
 	/// <summary> All currently rendered path lines. </summary>
 	private Deque<PathRenderer> pathList;
 
+	/// <summary> Whether the path renderer list is enabled. </summary>
+	private bool outlinePath;
+
 	/// <summary>
 	/// Creates a new path renderer list.
 	/// </summary>
 	/// <param name="startPath">The start of the path being rendered.</param>
 	public PathRendererList(PathComponent startPath) {
-		if (startPath != null) {
-			pathList = new Deque<PathRenderer>();
-			Init(startPath);
-		}
+		pathList = new Deque<PathRenderer>();
+		outlinePath = LevelManager.Instance.outlinePath;
+		Init(startPath);
 	}
 
 	/// <summary>
@@ -51,7 +53,7 @@ public class PathRendererList {
 			pathList.PopBack().SetVisible(false);
 		}
 		pathList.PushFront(pathRenderer);
-		pathRenderer.SetVisible(true);
+		pathRenderer.SetVisible(outlinePath);
 	}
 
 	/// <summary>
@@ -63,7 +65,7 @@ public class PathRendererList {
 			pathList.PopFront().SetVisible(false);
 		}
 		pathList.PushBack(pathRenderer);
-		pathRenderer.SetVisible(true);
+		pathRenderer.SetVisible(outlinePath);
 	}
 
 	/// <summary>

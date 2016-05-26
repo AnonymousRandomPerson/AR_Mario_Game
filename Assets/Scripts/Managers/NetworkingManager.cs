@@ -22,19 +22,23 @@ public class NetworkingManager : MonoBehaviour {
 	/// Sets the singleton instance.
 	/// </summary>
 	private void Awake() {
-		instance = this;
+		if (instance != null && instance != this) {
+			Destroy(gameObject);
+		} else {
+			instance = this;
+		}
+		DontDestroyOnLoad(gameObject);
 	}
 
 	/// <summary>
 	/// Finds the user data for the user.
 	/// </summary>
 	private void Start() {
-		userData = FindObjectOfType<UserData>();
 		if (userData == null) {
-			userData = gameObject.AddComponent<UserData>();
-		} else if (userData.gameObject != gameObject) {
-			instance = userData.GetComponent<NetworkingManager>();
-			Destroy(gameObject);
+			userData = FindObjectOfType<UserData>();
+			if (userData == null) {
+				userData = gameObject.AddComponent<UserData>();
+			}
 		}
 	}
 
@@ -60,7 +64,7 @@ public class NetworkingManager : MonoBehaviour {
 			OnGet(www.text);
 		} else {
 			Debug.Log(www.error);
-		} 
+		}
 	}
 
 	/// <summary>

@@ -9,8 +9,8 @@ public class OHKO : MonoBehaviour {
 	/// Kills the player instantly upon collision.
 	/// </summary>
 	/// <param name="collider">The collider that collided with the object.</param>
-	void OnTriggerEnter(Collider collider) {
-		if (collider.tag == "Player") {
+	private void OnTriggerEnter(Collider collider) {
+		if (collider.tag == "Player" && !collider.isTrigger) {
 			collider.gameObject.GetComponent<Player>().KillPlayer();
 		}
 	}
