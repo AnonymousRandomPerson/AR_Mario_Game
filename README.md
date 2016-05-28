@@ -15,5 +15,5 @@ Controls:
 *   J: Left rotate third-person camera
 *   L: Right rotate third-person camera
 *   Mouse movement: Rotate third-person camera
-*   Pause
-*   Unlock mouse from game
+*   P: Pause
+*   Escape: Unlock mouse from game
