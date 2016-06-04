@@ -7,6 +7,8 @@ using System.Collections.Generic;
 public struct PathInput {
 	/// <summary> The position of a path vertex. </summary>
 	public Vector3 position;
+	/// <summary> Whether the position has solid ground underneath. </summary>
+	public bool solid;
 	/// <summary> Y offset to raise points by. </summary>
 	private static float YOFFSET = 0.04f;
 
@@ -16,18 +18,22 @@ public struct PathInput {
 	/// <param name="x">The x coordinate of the path vertex.</param>
 	/// <param name="y">The y coordinate of the path vertex.</param>
 	/// <param name="z">The z coordinate of the path vertex.</param>
-	public PathInput(float x, float y, float z) {
+	/// <param name="solid">Whether the position has solid ground underneath.</param>
+	public PathInput(float x, float y, float z, bool solid = true) {
 		position = new Vector3(-x, y + YOFFSET, z);
+		this.solid = solid;
 	}
 
 	/// <summary>
 	/// Creates a path input.
 	/// </summary>
 	/// <param name="json">JSON data for the path vertex.</param>
-	public PathInput(JSONObject json) {
+	/// <param name="solid">Whether the position has solid ground underneath.</param>
+	public PathInput(JSONObject json, bool solid = true) {
 		position = PathUtil.MakeVectorFromJSON(json);
 		position.x = -position.x;
 		position.y += YOFFSET;
+		this.solid = solid;
 	}
 }
 

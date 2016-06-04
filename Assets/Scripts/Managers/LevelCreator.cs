@@ -102,7 +102,12 @@ public class LevelCreator : MonoBehaviour {
 		}
 		List<PathInput> pathInput = new List<PathInput>(pathJSON.list.Count);
 		foreach (JSONObject pathComponent in pathJSON.list) {
-			pathInput.Add(new PathInput(pathComponent));
+			List<JSONObject> points = pathComponent.GetField("points").list;
+			bool solid = pathComponent.GetField("solid").b;
+			Debug.Log(solid);
+			foreach (JSONObject point in points) {
+				pathInput.Add(new PathInput(point, solid));
+			}
 		}
 
 		// Parse platforms from JSON.
@@ -193,29 +198,31 @@ public class LevelCreator : MonoBehaviour {
 		// Construct virtual platforms to represent the colliders.
 		if (generatePathColliders) {
 			for (int i = 0; i < fullPath.Capacity; i++) {
-				List<Vector3> platform = new List<Vector3>();
-				Vector3 direction = pathInput[i + 1].position - pathInput[i].position;
-				Vector3 flatDirection = PathUtil.RemoveY(direction);
-				if (flatDirection == Vector3.zero) {
-					// Wall
-					if (i > 0) {
-						flatDirection = Vector3.Normalize(PathUtil.RemoveY(pathInput[i].position - pathInput[i - 1].position)) * platformThickness;
-						Vector3 directionRotate = new Vector3 (flatDirection.z, 0, -flatDirection.x);
-						Vector3 top = pathInput[i + 1].position.y > pathInput[i].position.y ? pathInput[i + 1].position : pathInput[i].position;
-						platform.Add(top + directionRotate);
-						platform.Add(top + directionRotate + flatDirection);
-						platform.Add(top - directionRotate + flatDirection);
-						platform.Add(top - directionRotate);
-						CreatePlatform (new PlatformInput(platform), Mathf.Abs(pathInput[i + 1].position.y - pathInput[i].position.y), true);
+				if (pathInput[i].solid) {
+					List<Vector3> platform = new List<Vector3>();
+					Vector3 direction = pathInput[i + 1].position - pathInput[i].position;
+					Vector3 flatDirection = PathUtil.RemoveY(direction);
+					if (flatDirection == Vector3.zero) {
+						// Wall.
+						if (i > 0) {
+							flatDirection = Vector3.Normalize(PathUtil.RemoveY(pathInput[i].position - pathInput[i - 1].position)) * platformThickness;
+							Vector3 directionRotate = new Vector3 (flatDirection.z, 0, -flatDirection.x);
+							Vector3 top = pathInput[i + 1].position.y > pathInput[i].position.y ? pathInput[i + 1].position : pathInput[i].position;
+							platform.Add(top + directionRotate);
+							platform.Add(top + directionRotate + flatDirection);
+							platform.Add(top - directionRotate + flatDirection);
+							platform.Add(top - directionRotate);
+							CreatePlatform (new PlatformInput(platform), Mathf.Abs(pathInput[i + 1].position.y - pathInput[i].position.y), true);
+						}
+					} else {
+						Vector3 flatDirectionNorm = Vector3.Normalize(flatDirection);
+						Vector3 directionRotate = new Vector3(flatDirectionNorm.z, 0, -flatDirectionNorm.x) * platformThickness;
+						platform.Add(pathInput[i + 1].position + directionRotate);
+						platform.Add(pathInput[i + 1].position - directionRotate);
+						platform.Add(pathInput[i].position - directionRotate);
+						platform.Add(pathInput[i].position + directionRotate);
+						CreatePlatform(new PlatformInput(platform), platformHeight, true);
 					}
-				} else {
-					Vector3 flatDirectionNorm = Vector3.Normalize(flatDirection);
-					Vector3 directionRotate = new Vector3(flatDirectionNorm.z, 0, -flatDirectionNorm.x) * platformThickness;
-					platform.Add(pathInput[i + 1].position + directionRotate);
-					platform.Add(pathInput[i + 1].position - directionRotate);
-					platform.Add(pathInput[i].position - directionRotate);
-					platform.Add(pathInput[i].position + directionRotate);
-					CreatePlatform(new PlatformInput(platform), platformHeight, true);
 				}
 			}
 		}
