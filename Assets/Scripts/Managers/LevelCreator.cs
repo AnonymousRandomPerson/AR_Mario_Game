@@ -15,6 +15,10 @@ public class LevelCreator : MonoBehaviour {
 	[SerializeField]
 	[Tooltip("Goal resource to be instantiated from.")]
 	private Goal goalPrefab;
+	/// <summary> Texture for surface paths. </summary>
+	[SerializeField]
+	[Tooltip("Texture for surface paths.")]
+	private Material surfaceMaterial;
 	/// <summary> Texture for virtual platforms. </summary>
 	[SerializeField]
 	[Tooltip("Texture for virtual platforms.")]
@@ -47,15 +51,15 @@ public class LevelCreator : MonoBehaviour {
 	[SerializeField]
 	[Tooltip("JSON file to load the level from.")]
 	private TextAsset json;
-	/// <summary> File to load surface data from. </summary>
-	[SerializeField]
-	[Tooltip("File to load surface data from.")]
-	private TextAsset surfaceFile;
 
-	/// <summary> Whether to generate colliders directly from path points. </summary>
+	/// <summary> The height of surface paths. </summary>
 	[SerializeField]
-	[Tooltip("Whether to generate colliders directly from path points.")]
-	private bool generatePathColliders = false;
+	[Tooltip("The height of surface paths.")]
+	private float surfaceHeight;
+	/// <summary> The thickness of surface paths. </summary>
+	[SerializeField]
+	[Tooltip("The thickness of surface paths.")]
+	private float surfaceThickness;
 
 	/// <summary> The height of virtual platforms. </summary>
 	[SerializeField]
@@ -103,37 +107,9 @@ public class LevelCreator : MonoBehaviour {
 		List<PathInput> pathInput = new List<PathInput>(pathJSON.list.Count);
 		foreach (JSONObject pathComponent in pathJSON.list) {
 			List<JSONObject> points = pathComponent.GetField("points").list;
-			bool solid = pathComponent.GetField("solid").b;
-			Debug.Log(solid);
+			int type = (int)pathComponent.GetField("type").i;
 			foreach (JSONObject point in points) {
-				pathInput.Add(new PathInput(point, solid));
-			}
-		}
-
-		// Parse platforms from JSON.
-		JSONObject platformJSON = input.GetField("virtual_platform");
-		List<PlatformInput> platformInput;
-		if (platformJSON == null) {
-			platformInput = new List<PlatformInput>(0);
-		} else {
-			platformInput = new List<PlatformInput>(platformJSON.list.Count);
-			foreach (JSONObject platform in platformJSON.list) {
-				platformInput.Add(new PlatformInput(platform));
-			}
-		}
-		// Hard-coded surfaces for testing.
-		if (surfaceFile != null) {
-			JSONObject surfaceJSON = new JSONObject(surfaceFile.text);
-			if (surfaceJSON.HasField("surfaces")) {
-				foreach (JSONObject surface in surfaceJSON.GetField("surfaces").list) {
-					platformInput.Add(new PlatformInput(surface));
-				}
-			} else {
-				foreach (JSONObject surface in surfaceJSON.list) {
-					foreach (JSONObject triangle in surface.list) {
-						platformInput.Add(new PlatformInput (triangle));
-					}
-				}
+				pathInput.Add(new PathInput(point, type));
 			}
 		}
 
@@ -173,56 +149,49 @@ public class LevelCreator : MonoBehaviour {
 			}
 		}
 
-		CreateLevel(pathInput, platformInput, enemyInput, collectibleInput, blockInput);
+		CreateLevel(pathInput, enemyInput, collectibleInput, blockInput);
 	}
 
 	/// <summary>
 	/// Creates a level from the given input.
 	/// </summary>
 	/// <param name="pathInput">The path for the level.</param>
-	/// <param name="platformInput">Virtual platforms in the level.</param></param>
 	/// <param name="enemyInput">Enemies in the level.</param>
 	/// <param name="collectibleInput">Collectibles in the level.</param>
 	/// <param name="blockInput">Blocks in the level.</param>
-	public void CreateLevel(List<PathInput> pathInput, List<PlatformInput> platformInput, List<EnemyInput> enemyInput, List<CollectibleInput> collectibleInput, List<BlockInput> blockInput) {
+	public void CreateLevel(List<PathInput> pathInput, List<EnemyInput> enemyInput, List<CollectibleInput> collectibleInput, List<BlockInput> blockInput) {
 		LevelManager levelManager = LevelManager.Instance;
-
-		// Create virtual platforms from the input.
-		foreach (PlatformInput input in platformInput) {
-			CreatePlatform(input);
-		}
 		
 		// Construct the path from the input points.
 		List<PathComponent> fullPath = new List<PathComponent>(pathInput.Count - 1);
 
 		// Construct virtual platforms to represent the colliders.
-		if (generatePathColliders) {
-			for (int i = 0; i < fullPath.Capacity; i++) {
-				if (pathInput[i].solid) {
-					List<Vector3> platform = new List<Vector3>();
-					Vector3 direction = pathInput[i + 1].position - pathInput[i].position;
-					Vector3 flatDirection = PathUtil.RemoveY(direction);
-					if (flatDirection == Vector3.zero) {
-						// Wall.
-						if (i > 0) {
-							flatDirection = Vector3.Normalize(PathUtil.RemoveY(pathInput[i].position - pathInput[i - 1].position)) * platformThickness;
-							Vector3 directionRotate = new Vector3 (flatDirection.z, 0, -flatDirection.x);
-							Vector3 top = pathInput[i + 1].position.y > pathInput[i].position.y ? pathInput[i + 1].position : pathInput[i].position;
-							platform.Add(top + directionRotate);
-							platform.Add(top + directionRotate + flatDirection);
-							platform.Add(top - directionRotate + flatDirection);
-							platform.Add(top - directionRotate);
-							CreatePlatform (new PlatformInput(platform), Mathf.Abs(pathInput[i + 1].position.y - pathInput[i].position.y), true);
-						}
-					} else {
-						Vector3 flatDirectionNorm = Vector3.Normalize(flatDirection);
-						Vector3 directionRotate = new Vector3(flatDirectionNorm.z, 0, -flatDirectionNorm.x) * platformThickness;
-						platform.Add(pathInput[i + 1].position + directionRotate);
-						platform.Add(pathInput[i + 1].position - directionRotate);
-						platform.Add(pathInput[i].position - directionRotate);
-						platform.Add(pathInput[i].position + directionRotate);
-						CreatePlatform(new PlatformInput(platform), platformHeight, true);
+		for (int i = 0; i < fullPath.Capacity; i++) {
+			if (pathInput[i].type != PlatformType.Gap) {
+				List<Vector3> platform = new List<Vector3>();
+				Vector3 direction = pathInput[i + 1].position - pathInput[i].position;
+				Vector3 flatDirection = PathUtil.RemoveY(direction);
+				float thickness = pathInput[i].type == PlatformType.Surface ? surfaceThickness : platformThickness;
+				if (flatDirection == Vector3.zero) {
+					// Wall.
+					if (i > 0) {
+						flatDirection = Vector3.Normalize(PathUtil.RemoveY(pathInput[i].position - pathInput[i - 1].position)) * thickness;
+						Vector3 directionRotate = new Vector3 (flatDirection.z, 0, -flatDirection.x);
+						Vector3 top = pathInput[i + 1].position.y > pathInput[i].position.y ? pathInput[i + 1].position : pathInput[i].position;
+						platform.Add(top + directionRotate);
+						platform.Add(top + directionRotate + flatDirection);
+						platform.Add(top - directionRotate + flatDirection);
+						platform.Add(top - directionRotate);
+						CreatePlatform(new PlatformInput(platform, pathInput[i].type), Mathf.Abs(pathInput[i + 1].position.y - pathInput[i].position.y));
 					}
+				} else {
+					Vector3 flatDirectionNorm = Vector3.Normalize(flatDirection);
+					Vector3 directionRotate = new Vector3(flatDirectionNorm.z, 0, -flatDirectionNorm.x) * thickness;
+					platform.Add(pathInput[i + 1].position + directionRotate);
+					platform.Add(pathInput[i + 1].position - directionRotate);
+					platform.Add(pathInput[i].position - directionRotate);
+					platform.Add(pathInput[i].position + directionRotate);
+					CreatePlatform(new PlatformInput(platform, pathInput[i].type));
 				}
 			}
 		}
@@ -305,7 +274,7 @@ public class LevelCreator : MonoBehaviour {
 				}
 				// Make sure the enemy is above ground.
 				Collider enemyCollider = null;
-				foreach (Collider collider in enemy.GetComponents<Collider> ()) {
+				foreach (Collider collider in enemy.GetComponents<Collider>()) {
 					if (!collider.isTrigger) {
 						enemyCollider = collider;
 						break;
@@ -349,7 +318,7 @@ public class LevelCreator : MonoBehaviour {
 			}
 			block.transform.parent = levelManager.transform.FindChild("Blocks").transform;
 			block.transform.position = input.position;
-			blocks.Add (block);
+			blocks.Add(block);
 		}
 
 		// Pass the needed data to the level manager to store.
@@ -385,16 +354,15 @@ public class LevelCreator : MonoBehaviour {
 	/// <returns>A new virtual platform from the specified top vertices.</returns>
 	/// <param name="input">The top vertices of the platform.</param>
 	/// <param name="height">The thickness of the platform.</param>
-	/// <param name="hidden">Whether to render the platform.</param>
-	private GameObject CreatePlatform(PlatformInput input, float height = 0, bool hidden = false) {
+	private GameObject CreatePlatform(PlatformInput input, float height = 0) {
 		if (height == 0) {
-			height = platformHeight;
+			height = input.type == PlatformType.Surface ? surfaceHeight : platformHeight;
 		}
 		List<Vector3> bottom = new List<Vector3>(input.vertices.Count);
 		for (int i = 0; i < input.vertices.Count; i++) {
 			bottom.Add(PathUtil.SetY(input.vertices[i], input.vertices[i].y - height));
 		}
-		return CreatePlatform(input, new PlatformInput (bottom), hidden);
+		return CreatePlatform(input, new PlatformInput(bottom, input.type));
 	}
 
 	/// <summary>
@@ -403,14 +371,18 @@ public class LevelCreator : MonoBehaviour {
 	/// <returns>A new virtual platform from the specified vertices.</returns>
 	/// <param name="top">The top vertices of the platform.</param>
 	/// <param name="bottom">The bottom vertices of the platform.</param>
-	/// <param name="hidden">Whether to render the platform.</param>
-	private GameObject CreatePlatform(PlatformInput top, PlatformInput bottom, bool hidden = false) {
+	private GameObject CreatePlatform(PlatformInput top, PlatformInput bottom) {
 		GameObject virtualPlatform = new GameObject();
-		virtualPlatform.name = hidden ? "Collider" : "Virtual Platform";
-		virtualPlatform.layer = 9;
+		virtualPlatform.layer = LayerMask.NameToLayer("Virtual");
 		virtualPlatform.AddComponent<MeshFilter>();
-		virtualPlatform.AddComponent<MeshRenderer>();
-		virtualPlatform.GetComponent<Renderer>().material = virtualPlatformMaterial;
+		MeshRenderer renderer = virtualPlatform.AddComponent<MeshRenderer>();
+		if (top.type == PlatformType.Surface) {
+			virtualPlatform.name = "Collider";
+			renderer.material = surfaceMaterial;
+		} else {
+			virtualPlatform.name = "Virtual Platform";
+			renderer.material = virtualPlatformMaterial;
+		}
 		Mesh mesh = virtualPlatform.GetComponent<MeshFilter>().mesh;
 
 		// Create the vertices of the platform.

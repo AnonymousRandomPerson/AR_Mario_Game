@@ -2,13 +2,22 @@
 using System.Collections.Generic;
 
 /// <summary>
+/// Types of platforms.
+/// </summary>
+public enum PlatformType {
+	Surface,
+	Gap,
+	Virtual
+}
+
+/// <summary>
 /// Used to add a path for a level.
 /// </summary>
 public struct PathInput {
 	/// <summary> The position of a path vertex. </summary>
 	public Vector3 position;
-	/// <summary> Whether the position has solid ground underneath. </summary>
-	public bool solid;
+	/// <summary> The type of platform to use. </summary>
+	public PlatformType type;
 	/// <summary> Y offset to raise points by. </summary>
 	private static float YOFFSET = 0.04f;
 
@@ -18,22 +27,22 @@ public struct PathInput {
 	/// <param name="x">The x coordinate of the path vertex.</param>
 	/// <param name="y">The y coordinate of the path vertex.</param>
 	/// <param name="z">The z coordinate of the path vertex.</param>
-	/// <param name="solid">Whether the position has solid ground underneath.</param>
-	public PathInput(float x, float y, float z, bool solid = true) {
+	/// <param name="type">The type of platform to use.</param>
+	public PathInput(float x, float y, float z, int type) {
 		position = new Vector3(-x, y + YOFFSET, z);
-		this.solid = solid;
+		this.type = (PlatformType)type;
 	}
 
 	/// <summary>
 	/// Creates a path input.
 	/// </summary>
 	/// <param name="json">JSON data for the path vertex.</param>
-	/// <param name="solid">Whether the position has solid ground underneath.</param>
-	public PathInput(JSONObject json, bool solid = true) {
+	/// <param name="type">The type of platform to use.</param>
+	public PathInput(JSONObject json, int type) {
 		position = PathUtil.MakeVectorFromJSON(json);
 		position.x = -position.x;
 		position.y += YOFFSET;
-		this.solid = solid;
+		this.type = (PlatformType)type;
 	}
 }
 
@@ -41,40 +50,19 @@ public struct PathInput {
 /// Used to add virtual platforms to a level.
 /// </summary>
 public struct PlatformInput {
-	/// <summary> The type of platform to create. </summary>
-	public int type;
 	/// <summary> The positions of the corners of the platform. </summary>
 	public List<Vector3> vertices;
-
-	/// <summary>
-	/// Creates a platform input.
-	/// </summary>
-	/// <param name="json">JSON data for the platform.</param>
-	public PlatformInput(JSONObject json) {
-		vertices = new List<Vector3> ();
-		if (json.HasField("platform_type")) {
-			type = (int)json.GetField("platform_type").n;
-		} else {
-			type = 1;
-		}
-		List<JSONObject> pointList;
-		if (json.HasField("platform_points")) {
-			pointList = json.GetField("platform_points").list;
-		} else {
-			pointList = json.list;
-		}
-		foreach (JSONObject vertex in pointList) {
-			vertices.Add(PathUtil.MakeVectorFromJSON(vertex));
-		}
-	}
+	/// <summary> The type of platform to use. </summary>
+	public PlatformType type;
 
 	/// <summary>
 	/// Creates a platform input.
 	/// </summary>
 	/// <param name="vertices">The positions of the corners of the platform.</param>
-	public PlatformInput(List<Vector3> vertices) {
-		type = 1;
+	/// <param name="type">The type of platform to use.</param>
+	public PlatformInput(List<Vector3> vertices, PlatformType type) {
 		this.vertices = vertices;
+		this.type = type;
 	}
 }
 
@@ -105,7 +93,7 @@ public struct EnemyInput {
 		JSONObject enemyPathJSON = json.GetField("enemy_path");
 		path = new List<PathInput>(enemyPathJSON.list.Count);
 		foreach (JSONObject pathComponent in enemyPathJSON.list) {
-			path.Add(new PathInput(pathComponent));
+			path.Add(new PathInput(pathComponent, (int)PlatformType.Surface));
 		}
 		enemyIndex = (int)json.GetField("enemy_type").n;
 	}
