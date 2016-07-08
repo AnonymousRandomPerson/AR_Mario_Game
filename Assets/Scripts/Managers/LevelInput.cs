@@ -5,8 +5,8 @@ using System.Collections.Generic;
 /// Types of platforms.
 /// </summary>
 public enum PlatformType {
-	Surface,
 	Gap,
+	Surface,
 	Virtual
 }
 

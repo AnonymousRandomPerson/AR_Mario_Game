@@ -92,7 +92,8 @@ public class LevelCreator : MonoBehaviour {
 	/// <param name="jsonText">The JSON text to create the level with.</param>
 	private void CreateLevel(string jsonText) {
 		JSONObject input = new JSONObject(jsonText);
-		Tracker.Instance.logJSON (jsonText);
+		Tracker.Instance.logJSON(jsonText);
+		Debug.Log(jsonText);
 
 		JSONObject meshJSON = input.GetField("mesh");
 		int meshIndex = meshJSON != null ? (int)meshJSON.n : 0;
@@ -101,7 +102,7 @@ public class LevelCreator : MonoBehaviour {
 		// Parse the path from JSON.
 		JSONObject pathJSON = input.GetField("route");
 		if (pathJSON == null) {
-			print("Failed to load JSON file.");
+			Debug.Log("Failed to load JSON file.");
 			return;
 		}
 		List<PathInput> pathInput = new List<PathInput>(pathJSON.list.Count);
