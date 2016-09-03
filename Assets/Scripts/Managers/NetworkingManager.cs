@@ -57,6 +57,14 @@ public class NetworkingManager : MonoBehaviour {
 	private IEnumerator GetURL(Action<string> OnGet) {
 		WWWForm form = new WWWForm();
 		form.AddField("username", GetUsername());
+
+		WWWForm settingsForm = new WWWForm();
+		Settings settings = Settings.instance;
+		settings.LoadSettings();
+		settingsForm.AddField(Settings.PATH_KEY, settings.pathSetting.ToString());
+		settingsForm.AddField(Settings.MOVEMENT_KEY, settings.movementSetting.ToString());
+		settingsForm.AddField(Settings.DIFFICULTY_KEY, settings.difficultySetting.ToString());
+
 		WWW www = new WWW(url, form);
 		yield return www;
 

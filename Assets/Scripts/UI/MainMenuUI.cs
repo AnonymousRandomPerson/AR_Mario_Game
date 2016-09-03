@@ -7,24 +7,41 @@ using UnityEngine.UI;
 /// </summary>
 public class MainMenuUI : MonoBehaviour {
 
-	/// <summary> The name of the scene that the scanning button will take the user to. </summary>
-	[Tooltip("The name of the scene that the scanning button will take the user to.")]
+	/// <summary> The name of the scene that the start button will take the user to. </summary>
+	[Tooltip("The name of the scene that the start button will take the user to.")]
 	public string startScene = "";
 
-	/// <summary> The input field for the user's username. </summary>
-	[Tooltip("The input field for the user's username.")]
-	public InputField usernameField;
-	/// <summary> Data about the user of the application. </summary>
-	[Tooltip("Data about the user of the application.")]
-	public UserData userData;
+	/// <summary> Slider for the path setting. </summary>
+	[SerializeField]
+	[Tooltip("Slider for the path setting.")]
+	private Slider pathSlider;
+	/// <summary> Slider for the movement setting. </summary>
+	[SerializeField]
+	[Tooltip("Slider for the movement setting.")]
+	private Slider movementSlider;
+	/// <summary> Slider for the difficulty setting. </summary>
+	[SerializeField]
+	[Tooltip("Slider for the difficulty setting.")]
+	private Slider difficultySlider;
+
+	/// <summary> The settings instance. </summary>
+	Settings settings;
+
+	/// <summary>
+	/// Loads the level settings.
+	/// </summary>
+	private void Start() {
+		settings = Settings.instance;
+		settings.LoadSettings();
+		pathSlider.value = settings.pathSetting;
+		movementSlider.value = settings.movementSetting;
+		difficultySlider.value = settings.difficultySetting;
+	}
 
 	/// <summary>
 	/// Takes the user to the level.
 	/// </summary>
-	public void StartScan() {
-		userData.username = usernameField.text;
-		if (userData.username != "") {
-			SceneManager.LoadScene(startScene);
-		}
+	public void StartLevel() {
+		SceneManager.LoadScene(startScene);
 	}
 }
