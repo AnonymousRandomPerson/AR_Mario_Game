@@ -60,10 +60,18 @@ public class NetworkingManager : MonoBehaviour {
 
 		WWWForm settingsForm = new WWWForm();
 		Settings settings = Settings.instance;
-		settings.LoadSettings();
-		settingsForm.AddField(Settings.PATH_KEY, settings.pathSetting.ToString());
-		settingsForm.AddField(Settings.MOVEMENT_KEY, settings.movementSetting.ToString());
-		settingsForm.AddField(Settings.DIFFICULTY_KEY, settings.difficultySetting.ToString());
+		float pathSetting, movementSetting, difficultySetting;
+		if (settings == null) {
+			pathSetting = movementSetting = difficultySetting = 0;
+		} else {
+			settings.LoadSettings();
+			pathSetting = settings.pathSetting;
+			movementSetting = settings.movementSetting;
+			difficultySetting = settings.difficultySetting;
+		}
+		settingsForm.AddField(Settings.PATH_KEY, pathSetting.ToString());
+		settingsForm.AddField(Settings.MOVEMENT_KEY, movementSetting.ToString());
+		settingsForm.AddField(Settings.DIFFICULTY_KEY, difficultySetting.ToString());
 
 		WWW www = new WWW(url, form);
 		yield return www;

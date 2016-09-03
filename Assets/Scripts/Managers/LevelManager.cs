@@ -7,7 +7,8 @@ using System.Collections.Generic;
 public class LevelManager : MonoBehaviour {
 
 	/// <summary> Singleton object. </summary>
-	private static LevelManager instance;
+    private static LevelManager instance;
+    /// <summary> Singleton object. </summary>
 	public static LevelManager Instance {
 		get {
 			if (instance == null) {
