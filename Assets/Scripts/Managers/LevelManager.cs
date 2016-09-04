@@ -51,6 +51,9 @@ public class LevelManager : MonoBehaviour {
 	/// <summary> The goal that the player needs to get to. </summary>
 	public Goal goal;
 
+    /// <summary> The number of times the player has died in the level. </summary>
+    public static int numDeaths;
+
 	/// <summary>
 	/// Sets the level manager instance.
 	/// </summary>

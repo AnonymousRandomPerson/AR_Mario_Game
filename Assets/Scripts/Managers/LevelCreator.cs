@@ -327,7 +327,8 @@ public class LevelCreator : MonoBehaviour {
 		levelManager.InitializePathRenderer();
 		levelManager.enemies = enemies;
 		levelManager.items = items;
-		levelManager.blocks = blocks;
+        levelManager.blocks = blocks;
+        LevelManager.numDeaths = 0;
 	}
 
 	/// <summary>
@@ -340,8 +341,14 @@ public class LevelCreator : MonoBehaviour {
 		Vector3 start = startInput.position;
 		Vector3 end = endInput.position;
 		Vector3 center = (start + end) / 2;
-		PathComponent path = Instantiate(pathPrefab, center, Quaternion.LookRotation(end - start, Vector3.up)) as PathComponent;
-		path.SetPath(start, end);
+
+        Vector3 lookVector = end - start;
+        if (lookVector == Vector3.zero) {
+            lookVector = Vector3.forward;
+        }
+		PathComponent path = Instantiate(pathPrefab, center, Quaternion.LookRotation(lookVector, Vector3.up)) as PathComponent;
+		
+        path.SetPath(start, end);
 		path.transform.Rotate(new Vector3 (0, -90, 0));
 		Vector3 tempScale = path.transform.localScale;
 		tempScale.x *= Vector3.Magnitude(end - start);

@@ -72,6 +72,7 @@ public class NetworkingManager : MonoBehaviour {
 		settingsForm.AddField(Settings.PATH_KEY, pathSetting.ToString());
 		settingsForm.AddField(Settings.MOVEMENT_KEY, movementSetting.ToString());
 		settingsForm.AddField(Settings.DIFFICULTY_KEY, difficultySetting.ToString());
+        settingsForm.AddField("numDeaths", LevelManager.numDeaths);
 
 		WWW www = new WWW(url, form);
 		yield return www;

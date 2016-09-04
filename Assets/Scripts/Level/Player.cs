@@ -371,6 +371,7 @@ public class Player : MonoBehaviour {
 		tracker.logAction("Killed player");
 		dead = true;
 		animator.speed = 0;
+        LevelManager.numDeaths++;
 	}
 
 	/// <summary>
