@@ -35,8 +35,6 @@ public class Player : MonoBehaviour {
 	public int baseMaxJumpTimer = 6;
 	/// <summary> Timer for varying the player's jump height. </summary>
 	private int jumpHeightTimer = 0;
-	/// <summary> Whether the player is on the ground and can jump. </summary>
-	private int groundCounter = 0;
 	/// <summary> Used to stop the jump animation if the player's y velocity stays at 0. </summary>
 	private bool jumpAnimationCutoff;
 
@@ -149,7 +147,7 @@ public class Player : MonoBehaviour {
 	/// <summary>
 	/// Moves the player according to input.
 	/// </summary>
-	private void FixedUpdate() {
+    private void FixedUpdate() {
 		if (GameMenuUI.paused) {
 			return;
 		}
@@ -182,7 +180,7 @@ public class Player : MonoBehaviour {
 			if (playerColor.a < Mathf.Epsilon) {
 				LevelManager.Instance.ResetLevel();
 			}
-		} else {
+        } else {
 			bool moving = false;
 			if (canMove) {
 				if (forward ^ backward) {
@@ -192,7 +190,7 @@ public class Player : MonoBehaviour {
 
 				UpdateRun(run && (forward ^ backward));
 
-				Jump(jump);
+                Jump(jump);
 			}
 			animator.SetBool("moving", moving);
 			animator.SetBool("running", run && moving);
@@ -201,7 +199,7 @@ public class Player : MonoBehaviour {
 
 			// Terminal velocity
 			if (-body.velocity.y > jumpSpeed) {
-				body.velocity = PathUtil.SetY(body.velocity, -jumpSpeed);
+                body.velocity = PathUtil.SetY(body.velocity, -jumpSpeed);
 			}
 
 			lostPowers = 0;
@@ -218,7 +216,7 @@ public class Player : MonoBehaviour {
 
 			if (PathUtil.OnFloor(gameObject)) {
 				KillPlayer();
-			}
+            }
 		}
 	}
 
@@ -247,55 +245,23 @@ public class Player : MonoBehaviour {
 	}
 
 	/// <summary>
-	/// Marks the player as grounded.
-	/// </summary>
-	/// <param name="collider">The collider that the player hit.</param>
-	private void OnTriggerEnter(Collider collider) {
-		if (isGround(collider.tag)) {
-			groundCounter++;
-			animator.SetBool("jumping", false);
-		}
-	}
-
-	/// <summary>
-	/// Marks the player as airborne.
-	/// </summary>
-	/// <param name="collider">The collider that the player is no longer hitting</param>
-	private void OnTriggerExit(Collider collider) {
-		if (isGround(collider.tag)) {
-			if (groundCounter > 0) {
-				groundCounter--;
-			}
-		}
-	}
-
-	// Checks whether the collided object's tag is ground or not.
-	/// <summary>
-	/// Checks whether the collided object's tag is ground or not.
-	/// </summary>
-	/// <returns>Whether the collided object's tag is ground or not.</returns>
-	/// <param name="tag">The tag of the collided object.</param>
-	private bool isGround(string tag) {
-		return tag != "Enemy" && tag != "Item" && tag != "Weapon";
-	}
-
-	/// <summary>
 	/// Handles the player jumping.
 	/// </summary>
 	/// <param name="isJumping">Whether the jump key is pressed.</param>
 	private void Jump(bool isJumping) {
 		// Varies the player's jump height based on movement speed and held jump button.
+        bool onGround = Physics.Raycast(transform.position, Vector3.down, physicsCollider.bounds.extents.y * 1.1f, 1 << 9);
 		if (isJumping && jumpHeightTimer < baseMaxJumpTimer * Mathf.Min(1.5f, pathMovement.moveSpeed / baseMoveSpeed)) {
 			bool incremented = false;
-			if (groundCounter > 0 || Physics.Raycast(transform.position + Vector3.down * physicsCollider.bounds.extents.y, Vector3.down, 0.01f, 1 << 9)) {
+            if (onGround) {
 				jumpHeightTimer++;
 				incremented = true;
 				tracker.logAction("Jumped.");
 				animator.SetBool("jumping", true);
-			}
+                transform.position += Vector3.up * physicsCollider.bounds.extents.y / 10f;
+            }
 			if (jumpHeightTimer > 0) {
-				body.velocity = PathUtil.SetY(body.velocity, jumpSpeed);
-				groundCounter = 0;
+                body.velocity = PathUtil.SetY(body.velocity, jumpSpeed);
 				if (!incremented) {
 					jumpHeightTimer++;
 				}
@@ -305,7 +271,7 @@ public class Player : MonoBehaviour {
 		} else {
 			jumpHeightTimer = 0;
 		}
-		if (Mathf.Abs(body.velocity.y) < Mathf.Epsilon) {
+        if (Mathf.Abs(body.velocity.y) < 1 && onGround) {
 			if (jumpAnimationCutoff) {
 				animator.SetBool("jumping", false);
 			} else {
@@ -454,7 +420,6 @@ public class Player : MonoBehaviour {
 		body.useGravity = true;
 		body.velocity = Vector3.zero;
 		body.constraints = body.constraints & ~RigidbodyConstraints.FreezePositionY;
-		groundCounter = 0;
 		score = 0;
 		jumpHeightTimer = 0;
 		foreach (Power power in powers) {

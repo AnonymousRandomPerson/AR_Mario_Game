@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: b49a9fb701c754c9eab84dd1e346d8e4
-timeCreated: 1458854393
+guid: e89494fe390cf4ede8ca140bd5955620
+timeCreated: 1472955564
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
@@ -13,14 +13,14 @@ ModelImporter:
     100010: body 1
     100012: head
     100014: head 1
-    100016: //RootNode
-    100018: leg1
-    100020: leg1 1
-    100022: leg1 2
-    100024: leg2
-    100026: model
-    100028: pelvis
-    100030: transform1
+    100016: leg1
+    100018: leg1 1
+    100020: leg1 2
+    100022: leg2
+    100024: model
+    100026: pelvis
+    100028: transform1
+    100030: //RootNode
     400000: arm1
     400002: arm1 1
     400004: arm2
@@ -29,14 +29,14 @@ ModelImporter:
     400010: body 1
     400012: head
     400014: head 1
-    400016: //RootNode
-    400018: leg1
-    400020: leg1 1
-    400022: leg1 2
-    400024: leg2
-    400026: model
-    400028: pelvis
-    400030: transform1
+    400016: leg1
+    400018: leg1 1
+    400020: leg1 2
+    400022: leg2
+    400024: model
+    400026: pelvis
+    400028: transform1
+    400030: //RootNode
     2300000: arm1 1
     2300002: arm2 1
     2300004: body 1
@@ -77,67 +77,7 @@ ModelImporter:
     animationScaleError: 0.5
     animationWrapMode: 0
     extraExposedTransformPaths: []
-    clipAnimations:
-    - serializedVersion: 16
-      name: Take 001
-      takeName: Take 001
-      firstFrame: 0
-      lastFrame: 1
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask:
-      - path: 
-        weight: 1
-      - path: body
-        weight: 1
-      - path: body/arm1
-        weight: 1
-      - path: body/arm1/arm1 1
-        weight: 1
-      - path: body/arm2
-        weight: 1
-      - path: body/arm2/arm2 1
-        weight: 1
-      - path: body/body 1
-        weight: 1
-      - path: body/head
-        weight: 1
-      - path: body/head/head 1
-        weight: 1
-      - path: body/pelvis
-        weight: 1
-      - path: body/pelvis/leg1
-        weight: 1
-      - path: body/pelvis/leg1/leg1 1
-        weight: 1
-      - path: body/pelvis/leg2
-        weight: 1
-      - path: body/pelvis/leg2/leg1 2
-        weight: 1
-      - path: model
-        weight: 1
-      - path: model/transform1
-        weight: 1
-      maskType: 0
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
+    clipAnimations: []
     isReadable: 1
   meshes:
     lODScreenPercentages: []

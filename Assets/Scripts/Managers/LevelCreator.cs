@@ -168,7 +168,7 @@ public class LevelCreator : MonoBehaviour {
 
 		// Construct virtual platforms to represent the colliders.
 		for (int i = 0; i < fullPath.Capacity; i++) {
-			if (pathInput[i].type != PlatformType.Gap) {
+            if (pathInput[i].type != PlatformType.Gap || i == 0) {
 				List<Vector3> platform = new List<Vector3>();
 				Vector3 direction = pathInput[i + 1].position - pathInput[i].position;
 				Vector3 flatDirection = PathUtil.RemoveY(direction);
