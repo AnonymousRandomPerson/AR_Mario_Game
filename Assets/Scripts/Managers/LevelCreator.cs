@@ -106,7 +106,7 @@ public class LevelCreator : MonoBehaviour {
 			return;
 		}
 		List<PathInput> pathInput = new List<PathInput>(pathJSON.list.Count);
-		foreach (JSONObject pathComponent in pathJSON.list) {
+		foreach (JSONObject pathComponent in pathJSON.list[0].list) {
 			List<JSONObject> points = pathComponent.GetField("points").list;
 			int type = (int)pathComponent.GetField("type").i;
 			foreach (JSONObject point in points) {
